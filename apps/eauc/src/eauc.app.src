@@ -1,0 +1,7 @@
+{application, eauc,
+  [{description, "EAuc Application"},
+   {vsn, "0.9"},
+   {registered, []},
+   {applications, [kernel, stdlib, n2o]},
+   {mod, { eauc, []}},
+   {env, []} ]}.

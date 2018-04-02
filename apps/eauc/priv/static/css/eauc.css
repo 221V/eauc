@@ -1,0 +1,111 @@
+
+*{
+  box-sizing:border-box;
+}
+html,body{
+  width:100%;
+  height:100%;
+  padding:0;
+  margin:0;
+  font-family:Georgia,"Times New Roman",Times,serif;
+}
+body{
+  background-color:#f2f9f5;
+}
+.cont{
+  display:block;
+  position:absolute;
+  min-height:100%;
+  width:100%;
+  padding-bottom: 30px;
+}
+.middle,
+.time_cont,
+#login_form,
+#hello_user,
+#lots_history{
+  position: relative;
+  margin: 0 auto;
+}
+.middle{
+  width:900px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.time_cont,
+#login_form,
+#hello_user{
+  width: 300px;
+}
+#lots_history{
+  width: 600px;
+}
+.hide{
+  display:none;
+}
+.footer{
+  width: 100%;
+  bottom: 0;
+  position: absolute;
+  height: 30px;
+  padding-top: 5px;
+}
+.footer span{
+  width: 200px;
+  display: block;
+  position: relative;
+  margin: 0 auto;
+}
+
+#lots_active > p{
+  border-top: 1px dashed #000;
+  padding-top: 10px;
+}
+div#lots_active p.a_lots:first-child{
+  border-bottom: 1px dashed #000;
+}
+div#lots_active p.a_lots:last-of-type{
+  border-bottom: 1px dashed #000;
+  padding-bottom: 10px;
+}
+#lots_active > p > .a_lot_time,
+#lots_history > p > .m_lot_time{
+  width: 75px;
+  display: inline-block;
+}
+#lots_active > p > .a_lot_count,
+#lots_history > p > .m_lot_count{
+  width: 45px;
+  display: inline-block;
+}
+#lots_active > p > .a_lot_name,
+#lots_history > p > .m_lot_name{
+  width: 100px;
+  display: inline-block;
+}
+#lots_active > p > .a_lot_bet_count,
+#lots_history > p > .m_lot_bet_count{
+  width: 45px;
+  display: inline-block;
+}
+#lots_active > p > .a_lot_nickname_last,
+#lots_history > p > .m_lot_nickname_last{
+  width: 120px;
+  display: inline-block;
+}
+#lots_active > p > .a_lot_bet_last,
+#lots_history > p > .m_lot_bet_last{
+  width: 75px;
+  display: inline-block;
+}
+#lots_active > p > .a_lot_bet{
+  width: 430px;
+  display: inline-block;
+}
+#lots_active > p > .a_lot_bet input{
+  width: 80px;
+}
+
+
+
+

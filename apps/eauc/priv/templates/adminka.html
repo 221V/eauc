@@ -1,0 +1,84 @@
+
+{# <div class="row cont"> #}
+
+<div class="row middle">
+  <p class="time_cont">Time: <span id="time_now"></span></p>
+  <div id="hello_user"></div>
+  
+  <div><hr>
+  <button id="menu_add_lot" class="menubtn active">Add new lot</button>
+  <button id="menu_a_lot_edit" class="menubtn">Edit active lot</button>
+  {# <button id="menu_f_lot_edit" class="menubtn">Edit finished lot</button> #}
+  <button id="menu_last_bets_all" class="menubtn">Last bets (all)</button>
+  <button id="menu_last_bets_by_lot_id" class="menubtn">Last bets by lot</button>
+  {# <button id="menu_user_info_by_id" class="menubtn">User info by id</button> #}
+  <hr></div>
+  
+  <div id="add_lot">
+    <label><span>lot name</span><br>
+    <input id="add_lot_name" type="text" value="" placeholder="lot name"></label><br><br>
+    <label><span>lot pieces count</span><br>
+    <input id="add_lot_count" type="number" min="1" step="1" value="1" placeholder="lot pieces count"></label><br><br>
+    <label><span>start bet (in pennies)</span><br>
+    <input id="add_lot_start_bet" type="number" min="1" step="1" value="1" placeholder="start bet (in pennies)"></label><br><br>
+    <label><span>bet step (in pennies)</span><br>
+    <input id="add_lot_bet_step" type="number" min="1" step="1" value="1" placeholder="bet step (in pennies)"></label><br><br>
+    <label><span>lot prise (or message)</span><br>
+    <textarea id="add_lot_prise" placeholder="lot prise (or message)"></textarea></label><br><br>
+    <br><br>
+    <label><span>start time<br>
+    ( format "dd.mm.yyyy,hh:mm" or "yyyy/mm/dd hh:mm" )</span><br>
+    <input id="add_lot_start_time" type="text" value="" placeholder="yyyy/mm/dd hh:mm"></label><br><br>
+    <label><span>length<br>
+    ( format "dd:hh:mm:ss" )<br>
+    you can set only start time and end time, or set only start time and length</span><br>
+    <input id="add_lot_time_length" type="text" value="" placeholder="dd:hh:mm:ss"></label><br><br>
+    <label><span>end time<br>
+    ( format "dd.mm.yyyy,hh:mm" or "yyyy/mm/dd hh:mm" )</span><br>
+    <input id="add_lot_end_time" type="text" value="" placeholder="yyyy/mm/dd hh:mm"></label><br><br>
+    <button id="add_lot_btn">Add new lot</button>
+  </div>
+  
+  <div id="a_lot_edit" class="hide">
+    <label><span>lot id for edit</span>
+    <input id="a_edit_lot_id" type="number" min="1" step="1" value=""></label><br><br>
+    <button id="edit_lot_id_load">load lot info by id</button><br>
+    <br><br>
+    
+    <div id="a_lot_edit_info" class="hide">
+    <label><span>lot name</span>
+    <input id="a_edit_lot_name" type="text" value="" placeholder="lot name"></label><br>
+    <label><span>lot pieces count</span>
+    <input id="a_edit_lot_count" type="number" min="1" step="1" value="1" placeholder="lot pieces count"></label><br>
+    <label><span>start bet (in pennies)</span>
+    <input id="a_edit_lot_start_bet" type="number" min="1" step="1" value="1" placeholder="start bet (in pennies)"></label><br>
+    <label><span>bet step (in pennies)</span>
+    <input id="a_edit_lot_bet_step" type="number" min="1" step="1" value="1" placeholder="bet step (in pennies)"></label><br>
+    <label><span>lot prise (or message)</span>
+    <textarea id="a_edit_lot_prise" placeholder="lot prise (or message)"></textarea></label><br>
+    <br><br>
+    <label><span>start time<br>
+    ( format "dd.mm.yyyy, hh:mm" or "yyyy/mm/dd hh:mm" )</span>
+    <input id="a_edit_lot_start_time" type="datetime-local" value=""></label><br>
+    <label><span>length<br>
+    ( format "dd:hh:mm:ss" )<br>
+    you can set only start time and end time, or set only start time and length</span>
+    <input id="a_edit_lot_length" type="text" value="" placeholder="dd:hh:mm:ss"></label><br>
+    <label><span>end time<br>
+    ( format "dd.mm.yyyy, hh:mm" or "yyyy/mm/dd hh:mm" )</span>
+    <input id="a_edit_lot_end_time" type="datetime-local" value=""></label><br>
+    <button id="a_edit_lot_btn">Edit lot</button>
+    </div>
+  </div>
+  {# <div id="f_lot_edit" class="hide"></div> editing finished lots, todo this later #}
+  
+  <div id="last_bets_all" class="hide"></div>
+  <div id="last_bets_by_lot_id" class="hide"></div>
+  {# <div id="user_info_by_id" class="hide"></div> show user info, all user bets and win lots, todo this later #}
+</div>
+
+<div class="footer">
+<span><a href="/">Main</a> |<a href="/auction/">Auction</a> | 2018++ &copy;</span>
+</div>
+
+{# </div> #}
