@@ -36,7 +36,7 @@ handle_info(_Req, State) ->
 
 
 terminate(Reason, _State) ->
-  io:format("Worker inactive lot ~p terminating: ~p~n", [?MODULE, Reason]),
+  io:format("Worker bets ~p terminating: ~p~n", [?MODULE, Reason]),
   ok.
 
 
@@ -63,9 +63,9 @@ complete_bets([{{Timestamp, Lot_Id, User_Id}, Bet}|T]) ->
         true ->
           %% bet ok
           
-          User_Money0 = pq:get_user_money_by_id(User_Id),
+          User_Money0 = pq:get_user_money_nick_by_id(User_Id),
           case User_Money0 of
-            [{User_Money}] ->
+            [{Nickname, User_Money}] ->
               
               case (User_Money >= Bet) of
                 true ->
@@ -77,11 +77,14 @@ complete_bets([{{Timestamp, Lot_Id, User_Id}, Bet}|T]) ->
                       %% no last bet by this user on this lot
                       
                       Money_New = User_Money - Bet,
-                      ResultN = pg:transaction(fun() ->
+                      
+                      ResultN = pg:transaction(fun(Worker) ->
                         %% transaction
                         
-                        pq:update_user_money(User_Id, Money_New),
-                        pq:make_money_log(User_Id, User_Money, Bet, 1)
+                        pq:make_new_bet(Worker, Lot_Id, Nickname, User_Id, Bet, Bet),
+                        pq:update_user_money(Worker, User_Id, Money_New),
+                        pq:make_money_log(Worker, User_Id, User_Money, Bet, 1),
+                        pq:update_lot_info(Worker, Lot_Id, Bet, Nickname, User_Id)
                         
                       end),
                       
@@ -98,12 +101,14 @@ complete_bets([{{Timestamp, Lot_Id, User_Id}, Bet}|T]) ->
                       %% there are some last bet by this user on this lot
                       
                       Money_Change = Bet - User_Last_Bet,
-                      Money_New = User_Money - Bet,
-                      ResultN = pg:transaction(fun() ->
+                      Money_New = User_Money - Money_Change,
+                      ResultN = pg:transaction(fun(Worker) ->
                         %% transaction
                         
-                        pq:update_user_money(User_Id, Money_New),
-                        pq:make_money_log(User_Id, User_Money, Money_Change, 2)
+                        pq:make_new_bet(Worker, Lot_Id, Nickname, User_Id, Money_Change, Bet),
+                        pq:update_user_money(Worker, User_Id, Money_New),
+                        pq:make_money_log(Worker, User_Id, User_Money, Money_Change, 2),
+                        pq:update_lot_info(Worker, Lot_Id, Bet, Nickname, User_Id)
                         
                       end),
                       

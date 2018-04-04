@@ -13,6 +13,7 @@
 % is_valid_email(A)
 % valid_start_time(A)
 % valid_time_length(A)
+% valid_ids_string(A)
 
 %% trim
 
@@ -31,6 +32,7 @@
 % timestamp2binary({{Year,Month,Day},{Hour,Minit,Second}})
 % timediff2binary({{Year,Month,Day},{Hour,Minit,Second}},{{Year2,Month2,Day2},{Hour2,Minit2,Second2}})
 % hash_pass(A)
+% lots_data2jsarr(Time_Now, Lots_Data, Acc)
 % 
 % =================
 
@@ -55,6 +57,13 @@ valid_start_time(A) ->
 
 valid_time_length(A) ->
   case re:run(A, "^[0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{2}$") of
+    nomatch -> false;
+    _ -> true
+  end.
+
+
+valid_ids_string(A) ->
+  case re:run(A, "^([0-9]{1,}[,]{1})*[0-9]{1,}$") of
     nomatch -> false;
     _ -> true
   end.
@@ -195,4 +204,29 @@ hash_pass(A) ->
   S2 = <<"yeah ____________<>(c)2018++ lol"/utf8>>,
   A2 = erlang:list_to_binary(A),
   [ erlang:element(C+1, {$0,$1,$2,$3,$4,$5,$6,$7,$8,$9,$A,$B,$C,$D,$E,$F}) || <<C:4>> <= crypto:hash(sha512, <<S1/binary,A2/binary,S2/binary>>)].
+
+
+% lots_data2jsarr(Time_Now, Lots_Data, Acc)
+lots_data2jsarr(_, [], []) -> <<"[]">>;
+lots_data2jsarr(Time_Now, Lots_Data, []) ->
+  ?MODULE:lots_data2jsarr(Time_Now, Lots_Data, [<<"[">>]);
+lots_data2jsarr(_, [], Acc) ->
+  lists:reverse([<<"]">>|Acc]);
+lots_data2jsarr(Time_Now, [{Id, Start_Bet, Bet_Step, Bet_Count, Bet_Last, Nickname_Last, Status, End_Time}|T], Acc) ->
+  Timer_Time = ?MODULE:timediff2binary(Time_Now, End_Time),
+  Lot_Bet_Input = case (Bet_Last > 0) of
+    true ->
+      erlang:integer_to_binary(erlang:floor((Bet_Last + Bet_Step)/100));
+    _ ->
+      erlang:integer_to_binary(erlang:floor(Start_Bet/100))
+  end,
+  End = case T of
+    [] -> <<"">>;
+    _ -> <<",">>
+  end,
+  
+  Z = [ <<"[">>, erlang:integer_to_binary(Id), <<",">>, erlang:integer_to_binary(Status), <<",\"">>, Timer_Time, <<"\",">>, Lot_Bet_Input, <<",">>, erlang:integer_to_binary(Bet_Count), <<",">>, erlang:integer_to_binary(erlang:floor(Bet_Last/100)), <<",\"">>, Nickname_Last, <<"\"">>, <<"]">>, End ],
+  
+  ?MODULE:lots_data2jsarr(Time_Now, T, [Z|Acc]).
+
 

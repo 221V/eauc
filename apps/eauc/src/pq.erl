@@ -12,10 +12,13 @@
 % get_time_now()
 % get_finished_lots(Limit, Offset)
 % get_active_lots(Limit, Offset)
+% get_active_lots_by_ids(Ids, Limit)
 % get_active_lot_bets_by_id(Lot_Id)
-% get_user_money_by_id(User_Id)
-% update_user_money(User_Id, Money)
-% make_money_log(User_Id, Money_Before, Money_Change, Money_Type)
+% get_user_money_nick_by_id(User_Id)
+% update_user_money(Worker, User_Id, Money)
+% make_money_log(Worker, User_Id, Money_Before, Money_Change, Money_Type)
+% make_new_bet(Worker, Lot_Id, Nickname, User_Id, Bet_Add, Bet_Total)
+% update_lot_info(Worker, Lot_Id, Last_Bet, Nickname, User_Id)
 % get_user_lot_lastbet(User_Id, Lot_Id)
 % make_finished_lots()
 % get_user_login(Email)
@@ -55,24 +58,36 @@ get_active_lots(Limit, Offset) ->
   pg:select("SELECT id, name, count, start_bet, bet_step, bet_count, bet_last, nickname_last, end_time FROM eauc_lots WHERE status = 1 ORDER BY end_time ASC LIMIT $1 OFFSET $2", [Limit, Offset]).
 
 
+get_active_lots_by_ids(Ids, Limit) ->
+  pg:select("SELECT id, start_bet, bet_step, bet_count, bet_last, nickname_last, status, end_time FROM eauc_lots WHERE id IN (" ++ Ids ++ ") Limit $1", [Limit]).
+
+
 get_active_lot_bets_by_id(Lot_Id) ->
   pg:select("SELECT start_bet, bet_step, bet_last FROM eauc_lots WHERE (id = $1 AND status = 1) LIMIT 1", [Lot_Id]).
 
 
-get_user_money_by_id(User_Id) ->
-  pg:select("SELECT money FROM eauc_users WHERE id = $1 LIMIT 1", [User_Id]).
+get_user_money_nick_by_id(User_Id) ->
+  pg:select("SELECT nickname, money FROM eauc_users WHERE id = $1 LIMIT 1", [User_Id]).
 
 
-update_user_money(User_Id, Money) ->
-  pg:in_up_del("UPDATE eauc_users SET money = $1 WHERE id = $2 ", [Money, User_Id]).
+update_user_money(Worker, User_Id, Money) ->
+  pg:transaction_q(Worker, "UPDATE eauc_users SET money = $1 WHERE id = $2 ", [Money, User_Id]).
 
 
-make_money_log(User_Id, Money_Before, Money_Change, Money_Type) ->
-  pg:in_up_del("INSERT INTO eauc_users_money_log (uid, money_before, money_change, money_type) VALUES ($1, $2, $3, $4)", [User_Id, Money_Before, Money_Change, Money_Type]).
+make_money_log(Worker, User_Id, Money_Before, Money_Change, Money_Type) ->
+  pg:transaction_q(Worker, "INSERT INTO eauc_users_money_log (uid, money_before, money_change, money_type) VALUES ($1, $2, $3, $4)", [User_Id, Money_Before, Money_Change, Money_Type]).
+
+
+make_new_bet(Worker, Lot_Id, Nickname, User_Id, Bet_Add, Bet_Total) ->
+  pg:transaction_q(Worker, "INSERT INTO eauc_bets (lot_id, nickname, uid, bet_add, bet_total) VALUES ($1, $2, $3, $4, $5)", [Lot_Id, Nickname, User_Id, Bet_Add, Bet_Total]).
+
+
+update_lot_info(Worker, Lot_Id, Last_Bet, Nickname, User_Id) ->
+  pg:transaction_q(Worker, "UPDATE eauc_lots SET bet_last = $1, nickname_last = $2, uid_last = $3, bet_count = bet_count + 1 WHERE id = $4 ", [Last_Bet, Nickname, User_Id, Lot_Id]).
 
 
 get_user_lot_lastbet(User_Id, Lot_Id) ->
-  pg:select("SELECT bet_total FROM eauc_bets WHERE lot_id = $1 AND uid = $1 ORDER BY id DESC LIMIT 1", [Lot_Id, User_Id]).
+  pg:select("SELECT bet_total FROM eauc_bets WHERE lot_id = $1 AND uid = $2 ORDER BY id DESC LIMIT 1", [Lot_Id, User_Id]).
 
 
 make_finished_lots() ->

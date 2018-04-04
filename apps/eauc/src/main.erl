@@ -25,8 +25,8 @@ event(init) ->
       %wf:redirect("/auction/")
       Uid = wf:session(uid),
       
-      Account_Money = case pq:get_user_money_by_id(Uid) of
-        [{User_Money}] ->
+      Account_Money = case pq:get_user_money_nick_by_id(Uid) of
+        [{_Nick,User_Money}] ->
           [ <<"$ ">>, erlang:integer_to_binary(erlang:floor(User_Money/100)) ];
         _ ->
           User_Money = <<"">>,
@@ -76,8 +76,8 @@ event({client,{login, Login, Pass}}) when erlang:is_list(Login), erlang:is_list(
               wf:user(Nickname),
               %wf:redirect("/auction/");
               
-              Account_Money = case pq:get_user_money_by_id(Uid) of
-                [{User_Money}] ->
+              Account_Money = case pq:get_user_money_nick_by_id(Uid) of
+                [{_Nick, User_Money}] ->
                   [ <<"$ ">>, erlang:integer_to_binary(erlang:floor(User_Money/100)) ];
                 _ ->
                   User_Money = <<"">>,

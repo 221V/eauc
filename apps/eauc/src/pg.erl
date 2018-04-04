@@ -65,6 +65,10 @@ transaction(Fun) ->
   end.
 
 
+transaction_q(Worker, Q, A) ->
+  epgsql_pool:query(Worker, Q, A).
+
+
 select(Q,A) ->
   case epgsql_pool:query(my_main_pool, Q, A) of
     {ok,_,R} ->

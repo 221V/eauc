@@ -21,12 +21,14 @@ event(init) ->
       Uid = wf:session(uid),
       Hello_User_HTML = hg:hello_user(Nickname, Uid),
       
-      Account_Money = case pq:get_user_money_by_id(Uid) of
-        [{User_Money}] ->
-          [ <<"$ ">>, erlang:integer_to_binary(erlang:floor(User_Money/100)) ];
+      Account_Money = case pq:get_user_money_nick_by_id(Uid) of
+        [{_Nick, User_Money}] ->
+          User_Money2 = erlang:integer_to_binary(erlang:floor(User_Money/100)),
+          User_Money2;
         _ ->
           User_Money = <<"">>,
-          <<"$ database err">>
+          User_Money2 = <<"0">>,
+          <<"database err">>
       end,
       
       Limit = 10,
@@ -37,10 +39,12 @@ event(init) ->
       Goto_Finished_HTML = hg:generate_goto_finished(),
       
       wf:wire(wf:f("qi('hello_user').innerHTML='~s';qi('hello_user').style.display='block';logout_bind();"
-                   "qi('usermoney').innerHTML='~s';"
+                   "window.user_money=~s;qi('usermoney').innerHTML='$ ~s';"
                    "qi('time_now').innerHTML='~s';page_timer_tick();"
                    "qi('lots_active').innerHTML='~s~s~s';"
-                   "page_timers_back();reload_active_bind();new_bet1_bind();", [unicode:characters_to_binary(Hello_User_HTML,utf8), unicode:characters_to_binary(Account_Money,utf8), unicode:characters_to_binary(Time_Now2,utf8), unicode:characters_to_binary(Lots_HTML,utf8), unicode:characters_to_binary(Reload_Active_Btn_HTML,utf8), unicode:characters_to_binary(Goto_Finished_HTML,utf8)])),
+                   "page_timers_back();reload_active_bind();new_bet1_bind();"
+                   "setTimeout(function(){update_display_user_money();}, 1000);"
+                   "setTimeout(function(){update_display_active_lots();}, 1000);", [unicode:characters_to_binary(Hello_User_HTML,utf8), unicode:characters_to_binary(User_Money2,utf8), unicode:characters_to_binary(Account_Money,utf8), unicode:characters_to_binary(Time_Now2,utf8), unicode:characters_to_binary(Lots_HTML,utf8), unicode:characters_to_binary(Reload_Active_Btn_HTML,utf8), unicode:characters_to_binary(Goto_Finished_HTML,utf8)])),
       case wf:session(status) of
         2 ->
           Admin_Url_HTML = hg:hello_admin_url(),
@@ -94,9 +98,9 @@ event({client,{new_bet1, Lot_Id, New_Bet}}) ->
           
           New_Bet2 = New_Bet * 100,
           Uid = wf:session(uid),
-          User_Money0 = pq:get_user_money_by_id(Uid),
+          User_Money0 = pq:get_user_money_nick_by_id(Uid),
           case User_Money0 of
-            [{User_Money}] ->
+            [{_Nick, User_Money}] ->
               
               case (User_Money >= New_Bet2) of
                 true ->
@@ -137,6 +141,63 @@ event({client,{new_bet1, Lot_Id, New_Bet}}) ->
         _ ->
           wf:wire("window.bet1_wait=false;alert('invalid bet data !');")
       end
+  end;
+
+
+event({client,{update_user_money}}) ->
+  Nickname = wf:user(),
+  case Nickname of
+    undefined ->
+      err;
+    _ ->
+      % ok, logged user
+      
+      Uid = wf:session(uid),
+      User_Money0 = pq:get_user_money_nick_by_id(Uid),
+      case User_Money0 of
+        [{_Nick, User_Money}] ->
+          % ok
+          
+          User_Money2 = erlang:integer_to_binary(erlang:floor(User_Money/100)),
+          
+          wf:wire(wf:f("window.user_money=~s;qi('usermoney').innerHTML='$ ~s';"
+            "window.upd_user_money_wait=false;setTimeout(function(){update_display_user_money();}, 5000);", [unicode:characters_to_binary(User_Money2,utf8), unicode:characters_to_binary(User_Money2,utf8)]));
+        _ ->
+          % user money db err
+          wf:wire("window.upd_user_money_wait=false;setTimeout(function(){update_display_user_money();}, 10000);")
+      end
+  end;
+
+
+event({client,{update_active_lots, Lots_Ids}}) ->
+  Valid_Ids = hm:valid_ids_string(Lots_Ids),
+  
+  case Valid_Ids of
+    true ->
+      %% ids valid
+      
+      Limit = 10,
+      Lots_Data = pq:get_active_lots_by_ids(Lots_Ids, Limit),
+      case Lots_Data of
+        [{_Some_Id, _, _, _, _, _, _, _}|_] ->
+          %% data ok
+          
+          case pq:get_time_now() of
+            [{Time_Now}] -> ok;
+            _ -> Time_Now = {{2000,1,1},{1,1,1}}
+          end,
+          Data2 = hm:lots_data2jsarr(Time_Now, Lots_Data, []),
+          
+          wf:wire(wf:f("window.upd_active_lots_wait=false;"
+            "do_update_display_active_lots('~s');"
+            "setTimeout(function(){update_display_active_lots();}, 2000);",[unicode:characters_to_binary(Data2,utf8)]));
+        _ ->
+          %% err or no data
+          wf:wire("window.upd_active_lots_wait=false;setTimeout(function(){update_display_active_lots();}, 2000);")
+      end;
+    _ ->
+      %% invalid ids
+      wf:wire("window.upd_active_lots_wait=false;setTimeout(function(){update_display_active_lots();}, 2000);")
   end;
 
 
